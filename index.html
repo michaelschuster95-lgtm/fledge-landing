@@ -290,11 +290,38 @@ footer { border-top: 1px solid var(--border); padding: 1.75rem 2rem; }
 </footer>
 
 <script>
-function handleSubmit(e) {
+const SUPABASE_URL = 'https://ucslwhfkqqrkhsqbovgv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_xEWuqGlkOMv86CfnySl1-w_caFGbmzW';
+
+async function handleSubmit(e) {
   e.preventDefault();
-  document.getElementById('form').style.display = 'none';
-  document.getElementById('note').style.display = 'none';
-  const s = document.getElementById('success');
-  s.style.display = 'flex';
+  const email = e.target.querySelector('input[type="email"]').value;
+  const btn = e.target.querySelector('button');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!res.ok && res.status !== 409) throw new Error();
+
+    document.getElementById('form').style.display = 'none';
+    document.getElementById('note').style.display = 'none';
+    const s = document.getElementById('success');
+    s.style.display = 'flex';
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Notify me';
+    alert('Something went wrong. Please try again.');
+  }
 }
 </script>
